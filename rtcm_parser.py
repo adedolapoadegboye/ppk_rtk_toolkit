@@ -9,7 +9,7 @@ from pyrtcm import RTCMReader
 program_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
 class RTCMParser:
-    def __init__(self, source, is_serial=True, baudrate=9600):
+    def __init__(self, source, is_serial=True, baudrate=115200, log_callback=None):
         """
         Initialize RTCMParser for a serial or network stream.
         :param source: COM port for serial or IP:port for TCP/UDP stream
@@ -21,6 +21,8 @@ class RTCMParser:
         self.baudrate = baudrate
         self.connection = None
         self.is_running = False
+        self.log_callback = log_callback  # Callback for logging messages
+
 
     def connect(self):
         """Establish connection to the data source."""
@@ -35,6 +37,11 @@ class RTCMParser:
         if self.connection:
             self.connection.close()
             self.connection = None
+
+    def log(self, message):
+        """Send log messages to the callback."""
+        if self.log_callback:
+            self.log_callback(f"{message}\n")
 
     def parse_stream(self, output_file):
         """
@@ -59,8 +66,9 @@ class RTCMParser:
                     if parsed_message:
                         # Log the data
                         log_file.write(f"{str(parsed_message)}\n")
-                        print(f"Raw Data: {raw_data}")
-                        print(f"Parsed Message: {parsed_message}")
+                        self.log(parsed_message)
+                        # print(f"Raw Data: {raw_data}")
+                        # print(f"Parsed Message: {parsed_message}")
             except Exception as e:
                 print(f"Error while parsing: {e}")
             finally:
