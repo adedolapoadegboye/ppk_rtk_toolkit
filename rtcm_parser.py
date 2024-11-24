@@ -1,9 +1,12 @@
 # File: rtcm_parser.py
 
+import os
 import serial
 import socket
 import datetime
 from pyrtcm import RTCMReader
+
+program_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
 class RTCMParser:
     def __init__(self, source, is_serial=True, baudrate=9600):
@@ -35,14 +38,18 @@ class RTCMParser:
 
     def parse_stream(self, output_file):
         """
-        Parse RTCM messages from the stream and log to a file.
+        Parse RTCM 3.3 messages from the stream and log to a file.
         :param output_file: File path to log RTCM messages
         """
         if not self.connection:
             raise Exception("No active connection. Call connect() first.")
 
+        # Ensure the directory for the output file exists
+        output_dir = os.path.dirname(output_file)
+        if output_dir and not os.path.exists(output_dir):
+            os.makedirs(output_dir)  # Create the directory if it doesn't exist
+
         with open(output_file, "w") as log_file:
-            log_file.write("Timestamp,Message_Type,Satellite_Count,Correction_Latency\n")
             reader = RTCMReader(self.connection)
             self.is_running = True
 
@@ -51,8 +58,9 @@ class RTCMParser:
                     raw_data, parsed_message = reader.read()
                     if parsed_message:
                         # Log the data
-                        log_file.write(parsed_message)
-                        print(parsed_message)
+                        log_file.write(f"{str(parsed_message)}\n")
+                        print(f"Raw Data: {raw_data}")
+                        print(f"Parsed Message: {parsed_message}")
             except Exception as e:
                 print(f"Error while parsing: {e}")
             finally:
@@ -65,6 +73,7 @@ class RTCMParser:
 
 # Example usage (can be triggered by GUI)
 if __name__ == "__main__":
-    parser = RTCMParser("COM4", is_serial=True, baudrate=115200)  # Replace with actual port
+    # parser = RTCMParser("COM4", is_serial=True, baudrate=115200)  # Replace with actual port - windows
+    parser = RTCMParser("/dev/cu.usbserial-14740", is_serial=True, baudrate=115200)  # Replace with actual port - MacOs
     parser.connect()
-    parser.parse_stream("rtcm_log.csv")
+    parser.parse_stream(f"./logs/{program_timestamp}_rtcm_log.csv")

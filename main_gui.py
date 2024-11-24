@@ -17,45 +17,44 @@ class PPKRTKToolkit:
         self.local_stream_input = None
         self.stream_input = None
         self.root = root
-        self.root.title("PPK-RTK Toolkit")
-        self.root.geometry("800x600")
+        self.root.title("NMEA-RTK-PPK Toolkit")
+        self.root.geometry("1400x700")
         self.create_widgets()
 
     def create_widgets(self):
         # Frame for RTCM Parsing and Logging
-        rtcm_frame = tk.LabelFrame(self.root, text="RTCM Parsing and Logging", padx=10, pady=10)
+        rtcm_frame = tk.LabelFrame(self.root, text="RTCM 3.3 Parsing and Logging", padx=10, pady=10)
         rtcm_frame.pack(fill="x", padx=10, pady=5)
 
-        # Local RTCM Subsection
-        local_rtcm_frame = tk.LabelFrame(rtcm_frame, text="Local RTCM", padx=10, pady=10)
+        ## Local RTCM Subsection
+        local_rtcm_frame = tk.LabelFrame(rtcm_frame, text="Local RTCM Source", padx=10, pady=10)
         local_rtcm_frame.pack(fill="x", padx=10, pady=5)
 
-        # Instruction Label
+        ### Instruction Label
         instruction_label = tk.Label(
             local_rtcm_frame,
-            text="Select either a COM port or enter a TCP/UDP IP address (not both).",
-            fg="blue",
-            font=("Arial", 10, "italic"),
-            wraplength=400,
+            text="Select either a COM port or enter a TCP/UDP IP address (not both)",
+            font=("Arial", 15, "italic"),
+            wraplength=800,
             justify="left",
             anchor="w",
         )
         instruction_label.pack(fill="x", padx=5, pady=5)
 
-        # Dropdown for connected USB ports
+        ### Dropdown for connected USB ports
         self.local_usb_ports = tk.StringVar(value="Select COM Port")
         self.local_usb_dropdown = ttk.Combobox(local_rtcm_frame, textvariable=self.local_usb_ports, state="readonly")
         self.local_usb_dropdown["values"] = self.get_serial_ports()
         self.local_usb_dropdown.pack(side="left", padx=5)
 
-        # TCP/UDP Entry Field
+        ### TCP/UDP Entry Field
         self.local_tcp_udp_input = tk.Entry(local_rtcm_frame, width=50)
         self.local_tcp_udp_input.insert(0, "Enter TCP/UDP IP Address")
         self.local_tcp_udp_input.bind("<FocusIn>",
                                       lambda event: self.clear_placeholder(event, "Enter TCP/UDP IP Address"))
         self.local_tcp_udp_input.pack(side="left", padx=5)
 
-        # Buttons for Local RTCM
+        ### Buttons for Local RTCM
         local_start_btn = tk.Button(local_rtcm_frame, text="Start Local Stream", command=self.start_local_rtcm_logging)
         local_start_btn.pack(side="left", padx=5)
 
@@ -71,7 +70,7 @@ class PPKRTKToolkit:
 
         # NTRIP Caster Input Field
         self.station_stream_input = tk.Entry(station_rtcm_frame, width=50)
-        self.station_stream_input.insert(0, "Enter NTRIP Caster URL or Stream")
+        self.station_stream_input.insert(0, "Enter NTRIP Server/Caster URL or Stream")
         self.station_stream_input.bind("<FocusIn>",
                                        lambda event: self.clear_placeholder(event, "Enter NTRIP Caster URL or Stream"))
         self.station_stream_input.pack(side="left", padx=5)
@@ -84,6 +83,24 @@ class PPKRTKToolkit:
         station_stop_btn = tk.Button(station_rtcm_frame, text="Stop Station Stream",
                                      command=self.stop_station_rtcm_logging)
         station_stop_btn.pack(side="left", padx=5)
+
+        # Frame for Consoles
+        console_frame = tk.LabelFrame(self.root, text="Console", padx=10, pady=10)
+        console_frame.pack(fill="x", padx=10, pady=5)
+
+        # Console Log Subsection - Local
+        console_local_frame = tk.LabelFrame(console_frame, text="Local Stream", padx=10, pady=10)
+        console_local_frame.pack(fill="both", padx=5, pady=10)
+
+        self.local_console_log_text = tk.Text(console_local_frame, height=10, wrap="none", state="disabled", bg="#f4f4f4")
+        self.local_console_log_text.pack(fill="both", padx=5, pady=5)
+
+        # Console Log Subsection - Station
+        console_local_frame = tk.LabelFrame(console_frame, text="Station Stream", padx=10, pady=10)
+        console_local_frame.pack(fill="both", padx=5, pady=10)
+
+        self.station_console_log_text = tk.Text(console_local_frame, height=10, wrap="none", state="disabled", bg="#f4f4f4")
+        self.station_console_log_text.pack(fill="both", padx=5, pady=5)
 
         # Frame for PPK/RTK File Processing
         file_frame = tk.LabelFrame(self.root, text="File Processing", padx=10, pady=10)
@@ -126,10 +143,10 @@ class PPKRTKToolkit:
             return
 
         if com_port != "Select COM Port":
-            messagebox.showinfo("Info", f"Starting Local RTCM Stream Logging on {com_port}...")
+            messagebox.showinfo("Info", f"Starting Local RTCM Stream Parsing and Logging for {com_port}...")
             # Add functionality to initialize and start the local stream via COM port
         elif tcp_ip != "Enter TCP/UDP IP Address":
-            messagebox.showinfo("Info", f"Starting Local RTCM Stream Logging on {tcp_ip}...")
+            messagebox.showinfo("Info", f"Starting Local RTCM Stream Parsing and Logging for {tcp_ip}...")
             # Add functionality to initialize and start the local stream via TCP/UDP
 
     @staticmethod
